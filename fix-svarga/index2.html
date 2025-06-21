@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+</head>
+<style>
+:root {
+  --primary: #b00000;
+  --accent: #f2c94c;
+  --background: linear-gradient(135deg, #1f1f1f, #3a1c1c);
+  --card-bg: rgba(255, 255, 255, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --text-light: #fff;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: var(--background);
+  color: var(--text-light);
+  overflow-x: hidden;
+}
+
+.game {
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  backdrop-filter: blur(12px);
+  background-color: var(--glass-bg);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  border-radius: 20px;
+  max-width: 960px;
+  width: 100%;
+  display: flex;
+  flex-direction: row-reverse;
+  overflow: hidden;
+  padding: 40px;
+  gap: 30px;
+  animation: fadeIn 1s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.game-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-area h2 {
+  font-size: 2.5rem;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.timer, .lives {
+  font-size: 1.2rem;
+  margin: 10px 0;
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.lives.animate {
+  animation: pulse 0.3s;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 80px);
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.card {
+  width: 80px;
+  height: 80px;
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px);
+  font-size: 32px;
+  color: var(--text-light);
+  transition: transform 0.3s, background 0.3s;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: scale(1.1);
+}
+
+.card.hidden {
+  color: transparent;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.play-button {
+  margin-top: 25px;
+  background: var(--primary);
+  border: none;
+  color: white;
+  font-size: 1rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.play-button:hover {
+  background: #900000;
+}
+
+.result, .leaderboard {
+  margin-top: 25px;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.popup {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-content {
+  background: #fff;
+  color: #111;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 90%;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.popup-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #900;
+}
+
+.popup-content button {
+  background-color: #25d366;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.popup-content button:hover {
+  background-color: #1ea955;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .game-grid {
+    grid-template-columns: repeat(4, 60px);
+    gap: 12px;
+  }
+
+  .card {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+
+  .game-area h2 {
+    font-size: 2rem;
+  }
+}
+
+</style>
+<body>
+  <section class="game">
+  <div class="container">
+        <div class="game-area">
+      <h2>Memory Game</h2>
+      <div class="timer" id="timer">Waktu: 30</div>
+      <div class="lives" id="lives">❤️❤️❤️</div>
+      <div class="game-grid" id="game-grid"></div>
+      <button id="playButton" style="padding: 12px 24px; font-size: 18px;">🎮 Mulai Game</button>
+
+      <div class="result" id="result"></div>
+      <div class="leaderboard" id="leaderboard">🏆 High Score Hari Ini: <span id="highscore">0</span></div>
+    </div>
+
+  </div>
+
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup()">&times;</button>
+      <h3>🎊 Selamat!</h3>
+      <div class="voucher" id="voucherCode">Kode Voucher: </div>
+      <button onclick="shareWhatsApp()">Bagikan ke WhatsApp</button>
+    </div>
+  </div>
+
+    <button id="adminButton" style="display:none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #4E0100; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">🔐 Validasi Admin</button>
+
+  <div class="popup"  id="adminPopup">
+    <div class="popup-content">
+         <button class="popup-close" onclick="document.getElementById('adminPopup').style.display='none'">&times;</button>
+    <h3>🔐 Validasi Kode Voucher</h3>
+    <label>Tanggal:</label>
+    <input type="date" id="checkDate">
+    <label>Kode:</label>
+    <input type="text" id="userCode" placeholder="Masukkan kode dari user">
+    <button onclick="validateCode()">Cek Validasi</button>
+    <p id="validationResult" style="margin-top: 1rem; font-weight: bold;"></p>
+
+    </div>
+  </div>
+    <audio id="win-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_e5e30500b5.mp3?filename=correct-2-46134.mp3"></audio>
+  <audio id="fail-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_3e3be3c646.mp3?filename=fail-144746.mp3"></audio>
+  </section>
+
+<script>
+const gameGrid = document.getElementById('game-grid');
+const timerEl = document.getElementById('timer');
+const resultEl = document.getElementById('result');
+const livesEl = document.getElementById('lives');
+const winSound = document.getElementById('win-sound');
+const failSound = document.getElementById('fail-sound');
+const highScoreEl = document.getElementById('highscore');
+
+let chances = 3;
+let timer;
+let interval;
+let flipped = [], matched = [], symbols = [];
+
+function shuffleSymbols() {
+  const iconList = [
+    'twemoji:sushi',
+    'twemoji:rice-ball',
+    'twemoji:oden',
+    'twemoji:fish-cake-with-swirl',
+    'twemoji:shrimp',
+    'twemoji:curry-rice',
+    'twemoji:rice-cracker',
+    'twemoji:dango'
+  ];
+  symbols = [...iconList, ...iconList].sort(() => 0.5 - Math.random());
+}
+
+function updateLives() {
+  livesEl.classList.add('animate');
+  livesEl.innerText = '❤️'.repeat(chances);
+  setTimeout(() => livesEl.classList.remove('animate'), 300);
+}
+
+function createGrid() {
+  gameGrid.innerHTML = '';
+  symbols.forEach((symbol, index) => {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.dataset.symbol = symbol;
+    card.dataset.index = index;
+
+    const icon = document.createElement('iconify-icon');
+    icon.setAttribute('icon', symbol);
+    icon.setAttribute('width', '36');
+    icon.setAttribute('height', '36');
+    icon.style.display = 'none'; // disembunyikan
+
+    card.appendChild(icon);
+    card.addEventListener('click', () => flipCard(card));
+    gameGrid.appendChild(card);
+  });
+}
+
+function flipCard(card) {
+  if (flipped.length >= 2 || matched.includes(card.dataset.index)) return;
+
+  const icon = card.querySelector('iconify-icon');
+  icon.style.display = 'block';
+
+  flipped.push(card);
+
+  if (flipped.length === 2) {
+    const [first, second] = flipped;
+    if (first.dataset.symbol === second.dataset.symbol) {
+      winSound.play();
+      matched.push(first.dataset.index, second.dataset.index);
+      flipped = [];
+      if (matched.length === symbols.length) {
+        clearInterval(interval);
+        const nextTime = new Date().getTime() + 24*60*60*1000;
+        localStorage.setItem('playedUntil', nextTime);
+        resultEl.innerText = '🎉 Selamat!';
+        showWinPopup();
+        const score = 30 - timer;
+        const best = localStorage.getItem('highScore') || 99;
+        if (score < best) {
+          localStorage.setItem('highScore', score);
+          highScoreEl.innerText = score;
+        }
+      }
+    } else {
+      setTimeout(() => {
+        flipped.forEach(c => {
+          c.querySelector('iconify-icon').style.display = 'none';
+        });
+        flipped = [];
+      }, 800);
+    }
+  }
+}
+
+function resetGame() {
+  flipped = [];
+  matched = [];
+  timer = 30;
+  updateLives();
+  shuffleSymbols();
+  createGrid();
+  clearInterval(interval);
+  interval = setInterval(() => {
+    timer--;
+    timerEl.innerText = `Waktu: ${timer}`;
+    if (timer <= 0) {
+      clearInterval(interval);
+      chances--;
+      failSound.play();
+      if (chances > 0) {
+        updateLives();
+        resultEl.innerText = `⏰ Waktu habis! Sisa nyawa: ${chances}. Main lagi!`;
+        setTimeout(() => resetGame(), 1500);
+      } else {
+        const nextTime = new Date().getTime() + 24 * 60 * 60 * 1000;
+        localStorage.setItem('playedUntil', nextTime);
+        resultEl.innerText = '💀 Kesempatan habis! Coba lagi besok.';
+        updateLives();
+      }
+    }
+  }, 1000);
+}
+
+function startGame() {
+  const playedUntil = localStorage.getItem('playedUntil');
+  if (playedUntil && new Date().getTime() < parseInt(playedUntil)) {
+    resultEl.innerText = "⛔ Kamu sudah bermain hari ini. Silakan kembali besok.";
+    return;
+  }
+
+  const high = localStorage.getItem('highScore') || 0;
+  highScoreEl.innerText = high;
+  resetGame();
+}
+
+document.getElementById('playButton').addEventListener('click', () => {
+  document.getElementById('playButton').style.display = 'none';
+  startGame();
+});
+
+
+</script>
+
+</body>
+</html>
